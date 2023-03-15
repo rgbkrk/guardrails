@@ -1,6 +1,7 @@
 """RAIL utilities."""
 from copy import deepcopy
 from typing import Dict, Optional, Tuple
+from guardrails.utils.pydantic_utils import convert_field_element
 
 from lxml import etree as ET
 
@@ -57,6 +58,10 @@ def read_rail(
 
 def load_output_schema(root: ET._Element) -> OutputSchema:
     """Validate parsed XML, create a prompt and a Schema object."""
+
+    # Replace all <field ... /> elements with the output of `convert_field_element(..)`
+    for field in root.findall("field"):
+        root.replace(field, convert_field_element(field))
 
     output = OutputSchema(parsed_rail=root)
     strict = False
